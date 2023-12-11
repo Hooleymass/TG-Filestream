@@ -61,6 +61,11 @@ if __name__ == "__main__":
     except Exception as err:
         logging.error(err.with_traceback(None))
     finally:
-        loop.run_until_complete(cleanup())
-        loop.stop()
-        logging.info("Stopped Services")
+        try:
+            loop.run_until_complete(cleanup())
+        except Exception as err:
+            logging.error(err.with_traceback(None))
+        finally:
+            loop.stop()
+            logging.info("Stopped Services")
+
