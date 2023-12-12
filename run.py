@@ -15,7 +15,7 @@ if __name__ == "__main__":
     start_flask_app()
     
     # Wait for Flask app to start (you might need to adjust the sleep duration)
-    time.sleep(5)
+    time.sleep(10)
     
     start_bot()
 
