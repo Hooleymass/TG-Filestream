@@ -74,7 +74,7 @@ if __name__ == "__main__":
     try:
         # Run Flask app in a separate thread
         import threading
-        flask_thread = threading.Thread(target=app.run, kwargs={'port': 5000, 'debug': False})
+        flask_thread = threading.Thread(target=app.run, kwargs={'port': 8080, 'debug': False})
         flask_thread.start()
 
         # Run asyncio loop for the main functionality
