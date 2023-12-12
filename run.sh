@@ -1,5 +1,7 @@
 #!/bin/env bash
 
+sudo apk add --no-cache build-base python3-dev
+
 # Start installing dependancy
 echo "Start installing..."
 pip install --no-cache-dir -r requirements.txt
