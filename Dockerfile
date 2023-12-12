@@ -1,13 +1,14 @@
-FROM python:3-alpine AS runner
- 
+FROM python:3.9-alpine
+
 WORKDIR /app
- 
-COPY --from=builder /app/venv venv
-COPY app.py app.py
- 
-ENV VIRTUAL_ENV=/app/venv
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-ENV FLASK_APP=app/app.py
+
+COPY requirements.txt ./
+
+RUN apk add build-base
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
  
 EXPOSE 8080
  
