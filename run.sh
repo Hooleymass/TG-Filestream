@@ -1,4 +1,8 @@
-#!/bin/bash
+#!/bin/env bash
+
+# Start installing dependancy
+echo "Start installing..."
+pip install --no-cache-dir -r requirements.txt
 
 # Start Flask app
 echo "Starting Flask app..."
