@@ -1,14 +1,14 @@
 import sys
 import asyncio
 import logging
-import json  # Added import for json
-from .vars import Var
+import json
 from aiohttp import web
 from pyrogram import idle
 from WebStreamer import utils
 from WebStreamer import StreamBot
 from WebStreamer.server import web_server
 from WebStreamer.bot.clients import initialize_clients
+from flask import Flask, jsonify  # Added Flask import
 
 logging.basicConfig(
     level=logging.DEBUG if Var.DEBUG else logging.INFO,
@@ -25,6 +25,7 @@ logging.getLogger("aiohttp.web").setLevel(logging.DEBUG if Var.DEBUG else loggin
 generated_urls = []
 
 server = web.AppRunner(web_server())
+app = Flask(__name__)  # Initialize Flask app
 
 loop = asyncio.get_event_loop()
 
@@ -46,10 +47,10 @@ async def start_services():
     if bot_info.dc_id:
         logging.info("DC ID =>> {}".format(str(bot_info.dc_id)))
     logging.info("URL =>> {}".format(Var.URL))
-    
+
     # Append the generated URL to the list
     generated_urls.append(Var.URL)
-    
+
     await idle()
 
 
@@ -62,9 +63,22 @@ async def cleanup():
         json.dump(generated_urls, json_file, indent=2)
 
 
+# Flask route to serve the generated URLs
+@app.route('/api/generated_urls', methods=['GET'])
+def get_generated_urls():
+    return jsonify(generated_urls)
+
+
 if __name__ == "__main__":
     try:
+        # Run Flask app in a separate thread
+        import threading
+        flask_thread = threading.Thread(target=app.run, kwargs={'port': 5000, 'debug': False})
+        flask_thread.start()
+
+        # Run asyncio loop for the main functionality
         loop.run_until_complete(start_services())
+
     except KeyboardInterrupt:
         pass
     except Exception as err:
