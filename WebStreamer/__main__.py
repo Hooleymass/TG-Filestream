@@ -1,56 +1,31 @@
-# This file is a part of TG-FileStreamBot
-# Coding : Jyothis Jayanth [@EverythingSuckz]
-
 import sys
 import asyncio
 import logging
+import json  # Added import for json
+from .vars import Var
 from aiohttp import web
 from pyrogram import idle
-from flask import Flask, jsonify, request  # Add Flask imports
 from WebStreamer import utils
 from WebStreamer import StreamBot
 from WebStreamer.server import web_server
 from WebStreamer.bot.clients import initialize_clients
 
-app = Flask(__name__)
-stream_urls = []
-
-
-@app.route('/')
-def index():
-    return 'Welcome to your streaming URLs app!'
-
-
-@app.route('/save_url', methods=['POST'])
-def save_url():
-    data = request.json
-    stream_url = data.get('url')
-    if stream_url:
-        stream_urls.append(stream_url)
-        save_to_json()
-        return jsonify(success=True)
-    else:
-        return jsonify(success=False, error='Invalid data')
-
-
-@app.route('/display_urls')
-def display_urls():
-    return jsonify(stream_urls)
-
-
-def save_to_json():
-    with open('stream_urls.json', 'w') as file:
-        file.write('\n'.join(stream_urls))
-
-
 logging.basicConfig(
-    level=logging.DEBUG if StreamBot.DEBUG else logging.INFO,
+    level=logging.DEBUG if Var.DEBUG else logging.INFO,
     datefmt="%d/%m/%Y %H:%M:%S",
     format="[%(asctime)s][%(name)s][%(levelname)s] ==> %(message)s",
     handlers=[logging.StreamHandler(stream=sys.stdout),
               logging.FileHandler("streambot.log", mode="a", encoding="utf-8")],)
 
+logging.getLogger("aiohttp").setLevel(logging.DEBUG if Var.DEBUG else logging.ERROR)
+logging.getLogger("pyrogram").setLevel(logging.INFO if Var.DEBUG else logging.ERROR)
+logging.getLogger("aiohttp.web").setLevel(logging.DEBUG if Var.DEBUG else logging.ERROR)
+
+# Added list to store generated URLs
+generated_urls = []
+
 server = web.AppRunner(web_server())
+
 loop = asyncio.get_event_loop()
 
 
@@ -62,21 +37,29 @@ async def start_services():
     StreamBot.username = bot_info.username
     logging.info("Initialized Telegram Bot")
     await initialize_clients()
-    if StreamBot.KEEP_ALIVE:
+    if Var.KEEP_ALIVE:
         asyncio.create_task(utils.ping_server())
     await server.setup()
-    await web.TCPSite(server, StreamBot.BIND_ADDRESS, StreamBot.PORT).start()
+    await web.TCPSite(server, Var.BIND_ADDRESS, Var.PORT).start()
     logging.info("Service Started")
     logging.info("bot =>> {}".format(bot_info.first_name))
     if bot_info.dc_id:
         logging.info("DC ID =>> {}".format(str(bot_info.dc_id)))
-    logging.info("URL =>> {}".format(StreamBot.URL))
+    logging.info("URL =>> {}".format(Var.URL))
+    
+    # Append the generated URL to the list
+    generated_urls.append(Var.URL)
+    
     await idle()
 
 
 async def cleanup():
     await server.cleanup()
     await StreamBot.stop()
+
+    # Save the list of generated URLs to a JSON file
+    with open("generated_urls.json", "w") as json_file:
+        json.dump(generated_urls, json_file, indent=2)
 
 
 if __name__ == "__main__":
