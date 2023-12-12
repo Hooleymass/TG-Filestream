@@ -2,6 +2,7 @@ import sys
 import asyncio
 import logging
 import json
+from .vars import Var
 from aiohttp import web
 from pyrogram import idle
 from WebStreamer import utils
