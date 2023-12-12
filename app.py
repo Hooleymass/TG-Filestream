@@ -1,6 +1,6 @@
 from flask import Flask, request
 from threading import Thread
-from Webstream import __main__ as telegram_bot
+from WebStreamer import __main__ as telegram_bot
 
 app = Flask(__name__)
 
