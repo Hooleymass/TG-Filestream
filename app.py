@@ -1,6 +1,8 @@
 from flask import Flask, request
 from threading import Thread
 from WebStreamer.__main__ import start_services, cleanup
+import asyncio
+import logging
 
 app = Flask(__name__)
 
@@ -17,8 +19,7 @@ def flask_api():
     # Your Flask API logic here
     return 'Flask API Response'
 
-def run_telegram_bot():
-    # Start the Telegram bot
+def run_telegram_bot(loop):
     try:
         loop.run_until_complete(start_services())
     except Exception as err:
@@ -26,7 +27,8 @@ def run_telegram_bot():
 
 if __name__ == '__main__':
     # Start the Telegram bot in a separate thread
-    telegram_thread = Thread(target=run_telegram_bot)
+    telegram_loop = asyncio.get_event_loop()
+    telegram_thread = Thread(target=run_telegram_bot, args=(telegram_loop,))
     telegram_thread.start()
 
     # Run Flask on port 5000 using Gunicorn
