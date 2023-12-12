@@ -4,11 +4,12 @@ WORKDIR /app
 
 COPY requirements.txt ./
 
-RUN apk add build-base
+RUN apk add build-base supervisor
 
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["python3","-m","WebStreamer"]
-CMD ["python3", "api.py"]
+EXPOSE 5000
+
+CMD ["/usr/bin/supervisord", "-c", "/app/supervisord.conf"]
